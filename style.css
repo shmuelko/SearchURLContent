@@ -1,0 +1,18 @@
+.button{
+	padding:3px; border: solid; 
+	border-width: thin; 
+	border-color: cadetblue; 
+	border-radius: 8px;
+	width :30px;
+	height :30px;
+}
+.save-btn{
+	margin-left: 5px;
+}
+.load-btn{
+	margin-left: 15px; 
+}
+.cont{
+	width: 110px;
+	position: inline;
+}

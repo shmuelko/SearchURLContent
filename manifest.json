@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+
+  "name": "Search In History",
+  "description": "",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "index-img-icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+	"tabs",
+    "activeTab", 
+    "history",
+    "https://ajax.googleapis.com/"
+  ]
+}
