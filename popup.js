@@ -1,67 +1,43 @@
-$(function(){
-	$('.save-btn').click(save);
-	$('.load-btn').click(load);
-	$('.search-btn').click(search);
-});
-
-var paint = function() {
-	chrome.tabs.executeScript({
-		code:'var prev = document.getElementById(\'page-marker\');'+
-			'if(prev != null){prev.remove();}'+ 
-			
-			'var div = document.createElement(\"div\");'+
-			'div.style.width = (window.innerWidth * 2/100) +\"px\";'+ 
-			'var pointerHeight = ((window.innerHeight / (document.body.scrollHeight / window.innerHeight)) - 9);'+
-			'div.style.height = (pointerHeight >= 15.5 ? pointerHeight: 15.5) +\"px\";'+			
-			'div.style.background = \"green\";'+	
-			
-			'div.style.position = \"fixed\";'+
-			'div.style.marginLeft = (window.innerWidth - 18.3 )+\"px\";'+   
-			'div.style.top = window.pageYOffset / window.innerHeight * pointerHeight + 21 +\"px\";'+
-			'div.id = \"page-marker\";'+ 
-			'document.body.appendChild(div);'
-	});
-};
-
-var save = function() {
-	
-	chrome.tabs.executeScript({
-		code:'localStorage.setItem(window.location.href,window.pageYOffset);'
-	});
-	paint();
-	
-	
-	
-};
-var search = function(){
-	
-	var object = {text: ''};
-	chrome.history.search(object, sendUrls);	
-	// alert('afterSerach');
+window.onload = function(){
+	document.getElementById('search-val').addEventListener('keypress', search, false);
 }
+
+var search = function(event){
+	if(event.keyCode == 13){
+		chrome.history.search({text: ''}, sendUrls);
+	}
+} 
 
 var sendUrls = function(historyItem){
 	var urls = [];
-
-	historyItem.forEach(function(element) {
-	    console.log(element.url);
-	    urls.push(element.url); 
-	});
-	console.log(urls);
-	// historyItem.foreach(function(value){
-	// 	console.log(value.url);
-	// });
-	
-	//console.log('return urls');
-
-	//console.log(historyItem); 
-	// alert(historyItem);
+	for(var i = 0; i < historyItem.length; i++){
+		urls.push(element.url); 
+	}
+	sendUrls(urls);
 }
 
- var load = function() { 
-	 chrome.tabs.executeScript({
-		code: 'window.scroll(0, localStorage.getItem(window.location.href));'
-	});
-	
-	
-};
+var sendUrls = function(urls){ 
+
+	var data = {
+		query: document.getElementById('search-val').value,
+		urls: urls
+	} 
+	data = JSON.stringify(data);
+
+	console.log('data');
+	console.log(data);
+
+	var myRequest = new Request('http://localhost/api', {method: 'POST', body: data});
+
+	fetch(myRequest)
+	    .then(function(response) {
+	        if(response.status == 200) return response.json();
+	        else throw new Error('Something went wrong on api server!');
+	    })
+	    .then(function(response) {
+	        console.debug(response);
+	    })
+	    .catch(function(error) {
+	        console.error(error);
+		})
+}

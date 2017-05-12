@@ -13,6 +13,24 @@
 	margin-left: 15px; 
 }
 .cont{
-	width: 110px;
-	position: inline;
+	width: 90%;
+	position: inline-flex;
+}
+
+.window{
+	width: 300px;
+	height: 200px;
+}
+
+.search-box{
+	padding: 5px;
+	margin: 5px;
+	border-width: thin;
+    border-color: #57b0b3;
+    border-radius: 4px;
+    box-shadow: -2px 1px 5px #888888;
+}
+
+.search-box:focus{
+	box-shadow: inset -2px 1px 5px #888888;
 }
