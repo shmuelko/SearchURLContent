@@ -1,13 +1,25 @@
 {
   "manifest_version": 2,
-  "name": "Search In History",
-  "description": "",
+  "name": "Find That Page",
+  "description": "Search In History Content",
   "version": "0.0.0",
   "browser_action": {
-    "default_icon": "img/index-img-icon.png",
+    "default_icon": "img/128-blue.png",
     "default_popup": "popup.html"
   },
+  "background":{
+    "scripts": ["js/background.js"],
+    "persistent": false
+  },
+  "omnibox": {
+    "keyword" : "sh"
+  },
+  "icons": {
+    "128": "img/128-blue.png",
+   "16": "img/16-blue.png"
+ },
   "permissions": [
 	   "history"
-  ]
+  ],
+  "content_security_policy": "default-src 'self'; connect-src http://127.0.0.1:8080 https://fathomless-tundra-65369.herokuapp.com;"
 }
