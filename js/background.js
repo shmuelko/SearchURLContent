@@ -23,60 +23,68 @@ function fetchInit(method,content){
                body: content ? JSON.stringify(content) : undefined}
 }
 
-function filterHistory(query, historyObjs){
+function getQueryId(query, historyObjs){
   const urls = historyObjs.map(o => o.url)
   console.dir({query, urls})
-  fetch(SEARCH_ENDPOINT, fetchInit('POST',{query, urls}))
-    .then(function(result){
-      if(result.status == 200){
-        const request_id = result.body
-        console.info(request_id)
-
+  return new Promise(function(resolve,reject){
+    fetch(SEARCH_ENDPOINT, fetchInit('POST',{query, urls}))
+    .then(function(response){
+      if(response.status == 200){
+        resolve(response.text())
       }
     }).catch(function(error){
-      console.error(error);
+      reject(error)
     })
+  })
 }
 
-function pollingResults(request_id){
-
+function pollResults(request_id){
   return new Promise(function(resolve, reject){
-    const pollingIntervalId = setInterval(pollResults, 1000)
-    var requestsCounter = 0
-    const MAX_REQUESTS = 200
-    function pollResults(req_id){
-      fetch(SEARCH_ENDPOINT + req_id,fetchInit('GET')).then((result)=> {
-        console.dir(result)
-        if(result.status == 200){
+    const pollingIntervalId = setInterval(() => queryResults(request_id), 1000)
+    var requestsCounter = 0, errorCounter = 0
+    const MAX_REQUESTS = 20
+    const MAX_ERRORS = 3
+    function queryResults(req_id){
+      fetch(SEARCH_ENDPOINT + req_id,fetchInit('GET')).then((response)=> {
+        if(response.status == 200){
+          response.json().then(function(searchResults){
+            if(searchResults.status === "finished"){
+              clearInterval(pollingIntervalId)
+              resolve(searchResults)
+            }
+          })
+
+        }else if(response.status != 404 || requestsCounter > MAX_REQUESTS || errorCounter > MAX_ERRORS){
           clearInterval(pollingIntervalId)
-          resolve(result.body)
-        }else if(result.status != 404 || requestsCounter > MAX_REQUESTS){
-          clearInterval(pollingIntervalId)
-          reject(result)
+          reject(response)
+        }else{
+          errorCounter++
         }
-      })
+      }).catch((error) => clearInterval(pollingIntervalId))
     }
   })
 }
 
 chrome.omnibox.onInputStarted.addListener((text, suggest) => {
-  fetchAllHistory().then((historyObjs) => {
-    filterHistory(text, historyObjs)
-  })
+
 })
 
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
-  fetchAllHistory().then((historyObjs) => {
-    filterHistory(text, historyObjs)
-  })
+
 })
 
 chrome.omnibox.onInputEntered.addListener((text,disposition)=>{
-
+  fetchAllHistory().then((historyObjs) => {
+    getQueryId(text, historyObjs).then((queryId)=>{
+      return pollResults(queryId)
+    }).then((results)=>{
+      console.dir(results.found_urls)
+    })
+  })
 })
 
 chrome.omnibox.onInputCancelled.addListener((text,disposition)=>{
 
 })
 
-chrome.omnibox.setDefaultSuggestion({ description:"all"})
+// chrome.omnibox.setDefaultSuggestion({ description:"all"})
