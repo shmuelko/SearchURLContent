@@ -2,7 +2,7 @@
 const SEARCH_ENDPOINT = "http://127.0.0.1:8080/"
 var historyObjectsCache;
 
-function fetchAllHistory(){
+function allHistory(){
   if(historyObjectsCache) return Promise.resolve(historyObjectsCache)
   return new Promise(function(resolve,reject){
     chrome.history.search({text:"", maxResults: 10}, function(results){
@@ -40,10 +40,10 @@ function getQueryId(query, historyObjs){
 
 function pollResults(request_id){
   return new Promise(function(resolve, reject){
-    const pollingIntervalId = setInterval(() => queryResults(request_id), 1000)
+    const pollingIntervalId = setInterval(() => queryResults(request_id), 1500)
     var requestsCounter = 0, errorCounter = 0
     const MAX_REQUESTS = 20
-    const MAX_ERRORS = 3
+    const MAX_ERRORS = 15
     function queryResults(req_id){
       fetch(SEARCH_ENDPOINT + req_id,fetchInit('GET')).then((response)=> {
         if(response.status == 200){
@@ -74,11 +74,13 @@ chrome.omnibox.onInputChanged.addListener((text, suggest) => {
 })
 
 chrome.omnibox.onInputEntered.addListener((text,disposition)=>{
-  fetchAllHistory().then((historyObjs) => {
+  allHistory().then((historyObjs) => {
     getQueryId(text, historyObjs).then((queryId)=>{
-      return pollResults(queryId)
-    }).then((results)=>{
-      console.dir(results.found_urls)
+      pollResults(queryId).then(function(results){
+        const filtered = historyObjs
+                          .filter(obj => results.found_urls.includes(obj.url))
+        if(filtered.length > 0) chrome.tabs.create({url:filtered[0].url})
+      })
     })
   })
 })
