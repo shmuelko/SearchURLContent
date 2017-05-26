@@ -18,8 +18,8 @@
 }
 
 .window{
-	width: 300px;
-	height: 200px;
+	width: 200px;
+	height: 180px;
 }
 
 .search-box{
@@ -33,4 +33,19 @@
 
 .search-box:focus{
 	box-shadow: inset -2px 1px 5px #888888;
+}
+
+body{
+    background: #485a65;
+}
+.header {
+    font-family: cursive;
+    background: #F0F0F0;
+    border: 1px solid #CCC;
+    padding: 14px;
+}
+.content {
+    background: #F0F0F0;
+    border: 1px solid #CCC;
+    margin: 20px auto;
 }

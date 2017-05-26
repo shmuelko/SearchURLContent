@@ -27,11 +27,14 @@ var sendUrls = function(urls){
 	console.log('data');
 	console.log(data);
 
-	var myRequest = new Request('http://localhost/api', {method: 'POST', body: data});
+	var myRequest = new Request('http://fathomless-tundra-65369.herokuapp.com/', {method: 'POST', body: data});
 
 	fetch(myRequest)
 	    .then(function(response) {
-	        if(response.status == 200) return response.json();
+	        if(response.status == 200){
+	        	document.getElementById('output').innerHTML = response.url;
+	        	return response;
+	        } 
 	        else throw new Error('Something went wrong on api server!');
 	    })
 	    .then(function(response) {
